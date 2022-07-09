@@ -6,8 +6,8 @@ export function printOwing(invoice) {
 }
 
 const invoice = {
-  orders: [{ amount: 2 }, { amount: 5 }],
-  customer: '엘리',
+  orders: [{ amount: 3 }, { amount: 6 }],
+  customer: '다비드',
 };
 printOwing(invoice);
 
