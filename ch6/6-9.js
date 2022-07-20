@@ -1,4 +1,4 @@
-const reading = { customer: 'ivan', quantity: 10, month: 5, year: 2017 };
+const reading = new Reading({ customer: 'ivan', quantity: 10, month: 5, year: 2017 });
 
 export class Reading {
   #customer;
