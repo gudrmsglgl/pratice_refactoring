@@ -11,6 +11,7 @@ class Organization {
     #name;
     #country;
     constructor(data) {
+        this.#data = data;
         this.#name = data.name;
         this.#country = data.country;
     }
@@ -31,4 +32,7 @@ class Organization {
         this.#country = value;
     }
 
+    get rawData() {
+        return { ... this.#data }; // 얉은복사, cloneDeep
+    }
 }
