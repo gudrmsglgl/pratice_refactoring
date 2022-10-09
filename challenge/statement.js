@@ -46,6 +46,39 @@ export function statement(invoice, plays) {
   return result;
 }
 
+class Play {
+  #amount;
+  #audience;
+  constructor(amount, audience) {
+    this.#amount = amount;
+    this.#audience = audience;
+  }
+  get amount() {
+    return this.#amount;
+  }
+  get point() {
+    return Math.max(this.#audience - 30, 0);
+  }
+}
+
+class Tragedy extends Play {
+  get amount() {
+    return this.#audience > 30 ? this.#amount += 1000 * (this.#audience - 30) : this.#amount;
+  }
+}
+
+class Comedy extends Play {
+  get amount() {
+    return perf.audience > 20 
+      ? this.#amount += 10000 + 500 * (this.#audience - 20)
+      : this.#amount += 300 * this.#audience;
+  }
+  get point() {
+    let result = super();
+    return result += Math.floor(this.#audience / 5);
+  }
+}
+
 // 사용예:
 const playsJSON = {
   hamlet: { name: 'Hamlet', type: 'tragedy' },
