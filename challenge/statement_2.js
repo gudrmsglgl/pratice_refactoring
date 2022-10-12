@@ -13,6 +13,7 @@ export function statement(invoice, plays) {
     let thisAmount = 0;
     
     const ticketCalculator = new TicketCalculator(play, perf.audience);
+    ticketCalculator.addAmount(ticketCalculator.amount);
     thisAmount += ticketCalculator.amount;
     volumeCredits += ticketCalculator.point;
     
@@ -30,6 +31,10 @@ export function statement(invoice, plays) {
 class TicketCalculator {
   #ticket;
   #play;
+  // total 저장할 수 있는 변수 설정하여 더하는 기능 추가
+  #totalAmount;
+  #totalPooint;
+
   constructor(play, audience) {
     this.#play = play;
     this.#ticket = this.createType(play.type, audience)
@@ -53,8 +58,16 @@ class TicketCalculator {
     return this.#ticket.amount;
   }
 
+  get totalAmount() {
+    return this.#totalAmount;
+  }
+
   get point() {
     return this.#ticket.point;
+  }
+
+  addAmount(param) {
+    this.#totalAmount += param;
   }
 
   info(format, audience) {
