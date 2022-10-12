@@ -7,6 +7,8 @@ export function statement(invoice, plays) {
     currency: 'USD',
     minimumFractionDigits: 2,
   }).format;
+  
+  // 외부에서 객체 생성 후 for문에서 연산처리
 
   for (let perf of invoice.performances) {
     const play = plays[perf.playID];
@@ -40,6 +42,7 @@ class TicketCalculator {
     this.#ticket = this.createType(play.type, audience)
   }
   
+  // ticket 변수에 객체 생성하여 담고 처리하기
   createType(type, audience) {
     switch (type) {
       case 'tragedy':
