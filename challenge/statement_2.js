@@ -1,68 +1,56 @@
 export function statement(invoice, plays) {
-  let totalAmount = 0;
-  let volumeCredits = 0;
-  let result = `청구 내역 (고객명: ${invoice.customer})\n`;
-  const format = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-  }).format;
   
-  // 외부에서 객체 생성 후 for문에서 연산처리
+  const ticketCalculator = new TicketCalculator();
+  ticketCalculator.addTicketUserInfo(invoice.customer);
 
   for (let perf of invoice.performances) {
     const play = plays[perf.playID];
-    let thisAmount = 0;
-    
-    const ticketCalculator = new TicketCalculator(play, perf.audience);
+    ticketCalculator.createType(play.type, perf.audience);
     ticketCalculator.addAmount(ticketCalculator.amount);
-    thisAmount += ticketCalculator.amount;
-    volumeCredits += ticketCalculator.point;
-    
-    // 청구 내역을 출력한다.
-    result += `  ${play.name}: ${format(thisAmount / 100)} (${
-        perf.audience
-      }석)\n`;
-    totalAmount += thisAmount;
+    ticketCalculator.addPoint(ticketCalculator.point);
+    ticketCalculator.addTicketInfo(play.name);
   }
-  result += `총액: ${format(totalAmount / 100)}\n`;
-  result += `적립 포인트: ${volumeCredits}점\n`;
-  return result;
+  
+  return ticketCalculator.printTicketInfo();
 }
 
 class TicketCalculator {
   #ticket;
-  #play;
-  // total 저장할 수 있는 변수 설정하여 더하는 기능 추가
-  #totalAmount;
-  #totalPooint;
+  #totalAmount = 0;
+  #totalPoint = 0;
+  #ticketInfo = "";
 
-  constructor(play, audience) {
-    this.#play = play;
-    this.#ticket = this.createType(play.type, audience)
-  }
-  
-  // ticket 변수에 객체 생성하여 담고 처리하기
+  #format = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+  }).format;
+
   createType(type, audience) {
     switch (type) {
       case 'tragedy':
-        return new Tragedy(40000, audience);
+        this.#ticket = new Tragedy(40000, audience);
         break;
       case 'comedy':
-        return new Comedy(30000, audience);
+        this.#ticket = new Comedy(30000, audience);
         break;
       default:
-        return new UnknownPlay(0,0);
+        this.#ticket = new UnknownPlay(0,0);
         break;
     }
   }
 
   get amount() {
+    console.log('get amount call');
     return this.#ticket.amount;
   }
 
   get totalAmount() {
     return this.#totalAmount;
+  }
+
+  get totalPoint() {
+    return this.#totalPoint;
   }
 
   get point() {
@@ -73,11 +61,26 @@ class TicketCalculator {
     this.#totalAmount += param;
   }
 
-  info(format, audience) {
-    return `  ${this.#play.name}: ${format(this.amount / 100)} (${
-      audience
+  addPoint(param) {
+    this.#totalPoint += param;
+  }
+
+  addTicketUserInfo(customer) {
+    this.#ticketInfo += `청구 내역 (고객명: ${customer})\n`;
+  }
+
+  addTicketInfo(name) {
+    this.#ticketInfo += `  ${name}: ${this.#format(this.amount / 100)} (${
+        this.#ticket.audience
     }석)\n`;
   }
+
+  printTicketInfo() {
+    this.#ticketInfo += `총액: ${this.#format(this.#totalAmount / 100)}\n`;
+    this.#ticketInfo += `적립 포인트: ${this.#totalPoint}점\n`;
+    return this.#ticketInfo;
+  }
+  
 }
 
 class Play {
@@ -90,6 +93,9 @@ class Play {
   get amount() {
     return this._amount;
   }
+  get audience() {
+    return this._audience;
+  }
   get point() {
     return Math.max(this._audience - 30, 0);
   }
@@ -97,17 +103,19 @@ class Play {
 
 class Tragedy extends Play {
   get amount() {
+    let result = 0;
     return this._audience > 30 
-      ? this._amount += 1000 * (this._audience - 30) 
-      : this._amount;
+      ? result += this._amount + 1000 * (this._audience - 30) 
+      : result += this._amount;
   }
 }
 
 class Comedy extends Play {
   get amount() {
+    let result = 0;
     return this._audience > 20 
-      ? this._amount += 10000 + 500 * (this._audience - 20) + (300 * this._audience)
-      : this._amount += 300 * this._audience;
+      ? result += this._amount + 10000 + 500 * (this._audience - 20) + (300 * this._audience)
+      : result += this._amount + 300 * this._audience;
   }
   get point() {
     let result = super.point;
