@@ -53,66 +53,29 @@ class Comedy extends Performance {
     }
 }
 
-
-export function createStatement(invoice, plays) {
-    const statement = {};
-    statement.customer = invoice.customer;
-    statement.performances = invoice.performances.map(
-        (p) => Performance.create(p.audience, plays[p.playID])
-    );
-    statement.totalAmount = totalAmount(statement.performances);
-    statement.totalCredits = totalCredits(statement.performances);
-    return statement;
-
-    function enrichPerformance(performance) {
-        const result = {...performance};
-        //result.play = playFor(performance);
-        //result.amount = amountFor(result);
-        //result.credit = creditFor(result); 
-        return result;
+export class Statement {
+    #customer;
+    #performances;
+    constructor(invoice, plays) {
+        this.#customer = invoice.customer;
+        this.#performances = invoice.performances.map(
+            (p) => Performance.create(p.audience, plays[p.playID])
+        );
     }
 
-    function playFor(performance) {
-        return plays[performance.playID];
+    get customer() {
+        return this.#customer;
     }
 
-    function amountFor(performance) {
-        let result = 0;
-        switch (performance.play.type) {
-            case 'tragedy': // 비극
-                result = 40000;
-                if (performance.audience > 30) {
-                    result += 1000 * (performance.audience - 30);
-                }
-                break;
-            case 'comedy': // 희극
-                result = 30000;
-                if (performance.audience > 20) {
-                    result += 10000 + 500 * (performance.audience - 20);
-                }
-                result += 300 * performance.audience;
-                break;
-            default:
-                throw new Error(`알 수 없는 장르: ${performance.play.type}`);
-        }
-        return result;
+    get performances() {
+        return [...this.#performances];
     }
 
-    function creditFor(performance) {
-        let result = 0;
-        result += Math.max(performance.audience - 30, 0);
-        // 희극 관객 5명마다 추가 포인트를 제공한다.
-        if ('comedy' === performance.play.type) {
-            result += Math.floor(performance.audience / 5);
-        }
-        return result;
-        }
-
-    function totalAmount(performances) {
-        return performances.reduce((sum, p) => sum += p.amount, 0);
+    get totalAmount() {
+        return this.#performances.reduce((sum, p) => sum += p.amount, 0);
     }
 
-    function totalCredits(performances) {
-        return performances.reduce((sum, p) => sum += p.credit, 0);
+    get totalCredits() {
+        return this.#performances.reduce((sum, p) => sum += p.credit, 0);
     }
 }
